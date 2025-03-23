@@ -1,0 +1,4 @@
+type HealthCheck {
+  apiStatus: String!
+}
+

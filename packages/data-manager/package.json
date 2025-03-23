@@ -1,0 +1,31 @@
+{
+  "name": "@spawn/data-manager",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "codegen": "prisma generate",
+    "db:push": "prisma db push",
+    "db:open": "prisma studio",
+    "lint": "eslint . --ext .ts",
+    "format": "eslint . --ext .ts --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "prisma": "^6.4.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.5.1",
+    "@spawn/eslint-config": "*",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.13.5",
+    "eslint": "^9.13.0",
+    "tsc-alias": "^1.8.11"
+  }
+}

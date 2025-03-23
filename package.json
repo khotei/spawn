@@ -1,0 +1,24 @@
+{
+  "name": "spawn",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": ">=npm@10.0.0",
+  "workspaces": [
+    "apps/**",
+    "packages/**"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "generate-graphql-code": "turbo generate-graphql-code",
+    "type-check": "turbo type-check",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "clean": "turbo clean && rm -rf ./turbo && rm -rf ./node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.4"
+  }
+}

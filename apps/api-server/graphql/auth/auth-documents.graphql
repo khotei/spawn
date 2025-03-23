@@ -1,0 +1,155 @@
+fragment User on User {
+  id
+  name
+  email
+  emailVerified
+  image
+}
+
+fragment Account on Account {
+  id
+  userId
+  type
+  provider
+  providerAccountId
+  refreshToken
+  accessToken
+  expiresAt
+  tokenType
+  scope
+  idToken
+  sessionState
+  user {
+    ...User
+  }
+}
+
+fragment Session on Session {
+  id
+  sessionToken
+  userId
+  expires
+  user {
+    ...User
+  }
+}
+
+fragment VerificationToken on VerificationToken {
+  identifier
+  token
+  expires
+}
+
+query User($input: UserInput!) {
+  user(input: $input) {
+    ...User
+  }
+}
+
+query UserByEmail($input: UserByEmailInput!) {
+  userByEmail(input: $input) {
+    ...User
+  }
+}
+
+query Session($input: SessionInput!) {
+  session(input: $input) {
+    ...Session
+  }
+}
+
+query UserByProviderUserId($input: UserByProviderUserIdInput!) {
+  userByProviderUserId(input: $input) {
+    ...User
+  }
+}
+
+query Account($input: AccountInput!) {
+  account(input: $input) {
+    ...Account
+  }
+}
+
+mutation SignUp($input: SignUpInput!) {
+  signUp(input: $input) {
+    ...User
+  }
+}
+
+mutation SignIn($input: SignInInput!) {
+  signIn(input: $input) {
+    ...User
+  }
+}
+
+mutation CreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    ...User
+  }
+}
+
+mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    ...User
+  }
+}
+
+mutation DeleteUser($input: DeleteUserInput!) {
+  deleteUser(input: $input) {
+    ...User
+  }
+}
+
+mutation CreateAccount($input: CreateAccountInput!) {
+  createAccount(input: $input) {
+    ...Account
+  }
+}
+
+mutation DeleteAccount($input: DeleteAccountInput!) {
+  deleteAccount(input: $input) {
+    ...Account
+  }
+}
+
+mutation LinkAccount($input: LinkAccountInput!) {
+  linkAccount(input: $input) {
+    ...Account
+  }
+}
+
+mutation UnlinkAccount($input: UnlinkAccountInput!) {
+  unlinkAccount(input: $input) {
+    ...Account
+  }
+}
+
+mutation CreateSession($input: CreateSessionInput!) {
+  createSession(input: $input) {
+    ...Session
+  }
+}
+
+mutation UpdateSession($input: UpdateSessionInput!) {
+  updateSession(input: $input) {
+    ...Session
+  }
+}
+
+mutation DeleteSession($input: DeleteSessionInput!) {
+  deleteSession(input: $input) {
+    ...Session
+  }
+}
+
+mutation CreateVerificationToken($input: CreateVerificationTokenInput!) {
+  createVerificationToken(input: $input) {
+    ...VerificationToken
+  }
+}
+
+mutation VerifyToken($input: VerifyTokenInput!) {
+  verifyToken(input: $input) {
+    ...VerificationToken
+  }
+}

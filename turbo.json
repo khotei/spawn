@@ -1,0 +1,40 @@
+{
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "cache": false,
+      "dependsOn": [
+        "^build",
+        "generate-graphql-code",
+        "codegen"
+      ]
+    },
+    "generate-graphql-code": {
+      "cache": false,
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "codegen": {
+      "cache": true
+    },
+    "type-check": {
+      "cache": false,
+      "dependsOn": [
+        "generate-graphql-code"
+      ]
+    },
+    "lint": {
+      "cache": false
+    },
+    "format": {
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "@spawn/client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "generate-graphql-code": "generate-graphql-code --web",
+    "clean": "rm -rf dist && rm -rf .next && rm -rf __generated__ && rm -rf node_modules"
+  },
+  "dependencies": {
+    "graphql": "^16.10.0",
+    "graphql-tag": "^2.12.6",
+    "lodash": "^4.17.21",
+    "next": "15.2.2",
+    "next-auth": "^5.0.0-beta.25",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@spawn/eslint-config": "*",
+    "@spawn/generate-graphql-code": "*",
+    "@tailwindcss/postcss": "^4",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

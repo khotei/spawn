@@ -1,0 +1,136 @@
+extend type Query {
+  user(input: UserInput!): User
+  userByEmail(input: UserByEmailInput!): User
+  session(input: SessionInput!): Session
+  userByProviderUserId(input: UserByProviderUserIdInput!): User
+  account(input: AccountInput!): Account
+}
+
+extend type Mutation {
+  signUp(input: SignUpInput!): User!
+  signIn(input: SignInInput!): User!
+
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser(input: DeleteUserInput!): User!
+
+  createAccount(input: CreateAccountInput!): Account!
+  deleteAccount(input: DeleteAccountInput!): Account!
+  linkAccount(input: LinkAccountInput!): Account!
+  unlinkAccount(input: UnlinkAccountInput!): Account!
+
+  createSession(input: CreateSessionInput!): Session!
+  updateSession(input: UpdateSessionInput!): Session!
+  deleteSession(input: DeleteSessionInput!): Session!
+
+  createVerificationToken(input: CreateVerificationTokenInput!): VerificationToken!
+  verifyToken(input: VerifyTokenInput!): VerificationToken
+}
+
+input UserInput {
+  id: String!
+}
+
+input UserByEmailInput {
+  email: String!
+}
+
+input SessionInput {
+  sessionToken: String!
+}
+
+input UserByProviderUserIdInput {
+  providerUserId: String!
+}
+
+input AccountInput {
+  providerAccountId: String!
+  provider: String!
+}
+
+input SignUpInput {
+  email: String!
+  password: String!
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+input CreateUserInput {
+  name: String
+  email: String!
+  emailVerified: DateTimeISO
+  image: String
+}
+
+input UpdateUserInput {
+  id: String!
+  name: String
+  email: String
+  emailVerified: DateTimeISO
+  image: String
+}
+
+input DeleteUserInput {
+  id: String!
+}
+
+input CreateAccountInput {
+  userId: String!
+  type: String!
+  provider: String!
+  providerAccountId: String!
+  refreshToken: String
+  accessToken: String
+  expiresAt: DateTimeISO
+  tokenType: String
+  scope: String
+  idToken: String
+  sessionState: String
+}
+
+input DeleteAccountInput {
+  id: String!
+}
+
+input LinkAccountInput {
+  userId: String!
+  provider: String!
+  providerAccountId: String!
+  # @todo: add enum
+  type: String!
+}
+
+input UnlinkAccountInput {
+  providerAccountId: String!
+  provider: String!
+}
+
+input CreateSessionInput {
+  sessionToken: String!
+  userId: String!
+  expires: DateTimeISO!
+}
+
+input UpdateSessionInput {
+  sessionToken: String!
+  userId: String
+  expires: DateTimeISO
+}
+
+input DeleteSessionInput {
+  sessionToken: String!
+}
+
+input CreateVerificationTokenInput {
+  identifier: String!
+  token: String!
+  expires: DateTimeISO!
+}
+
+input VerifyTokenInput {
+  identifier: String!
+  token: String!
+}

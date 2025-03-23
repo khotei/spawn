@@ -1,0 +1,25 @@
+{
+  "name": "@spawn/graphql-server",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "format": "eslint . --ext .ts --fix",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@graphql-tools/load-files": "^7.0.1",
+    "@graphql-tools/merge": "^9.0.21",
+    "graphql": "^16.10.0",
+    "graphql-yoga": "^5.12.1"
+  },
+  "devDependencies": {
+    "@spawn/eslint-config": "*",
+    "eslint": "^9.13.0",
+    "@types/node": "^22.13.5",
+    "tsx": "^4.19.3"
+  }
+}

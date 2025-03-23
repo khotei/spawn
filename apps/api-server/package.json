@@ -1,0 +1,37 @@
+{
+  "name": "@spawn/api-server",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node dist/main.js",
+    "build": "tsc && tsc-alias",
+    "dev": "tsx watch --env-file=.env ./main.ts",
+    "test": "tsx --test ./**/*.test.ts",
+    "generate-graphql-code": "generate-graphql-code",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "format": "eslint . --ext .ts --fix",
+    "clean": "rm -rf dist && rm -rf __generated__"
+  },
+  "dependencies": {
+    "@spawn/data-manager": "*",
+    "@spawn/graphql-server": "*",
+    "graphql": "^16.10.0",
+    "graphql-scalars": "^1.24.2",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.5.1",
+    "@spawn/eslint-config": "*",
+    "@spawn/generate-graphql-code": "*",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.13.5",
+    "@types/supertest": "^6.0.2",
+    "eslint": "^9.13.0",
+    "supertest": "^7.0.0",
+    "tsc-alias": "^1.8.11",
+    "tsx": "^4.19.3"
+  }
+}
