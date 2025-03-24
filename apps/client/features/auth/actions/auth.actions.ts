@@ -1,7 +1,10 @@
 "use server"
 
-import { signIn, signOut } from "@/lib/auth-config"
-import { query } from "@/lib/query"
+import { query } from "@/common/lib/query"
+import {
+  signIn,
+  signOut,
+} from "@/features/auth/lib/auth-config"
 import { authValidation } from "@/validation/auth-validation"
 
 export const register = async (
@@ -34,4 +37,8 @@ export const login = async (
 
 export const logout = async () => {
   await signOut()
+}
+
+export const signWithGoogle = async () => {
+  await signIn("google")
 }

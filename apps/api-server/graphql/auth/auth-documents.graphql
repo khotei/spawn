@@ -58,8 +58,8 @@ query Session($input: SessionInput!) {
   }
 }
 
-query UserByProviderUserId($input: UserByProviderUserIdInput!) {
-  userByProviderUserId(input: $input) {
+query UserByAccountId($input: UserByAccountInput!) {
+  userByAccount(input: $input) {
     ...User
   }
 }
@@ -97,18 +97,6 @@ mutation UpdateUser($input: UpdateUserInput!) {
 mutation DeleteUser($input: DeleteUserInput!) {
   deleteUser(input: $input) {
     ...User
-  }
-}
-
-mutation CreateAccount($input: CreateAccountInput!) {
-  createAccount(input: $input) {
-    ...Account
-  }
-}
-
-mutation DeleteAccount($input: DeleteAccountInput!) {
-  deleteAccount(input: $input) {
-    ...Account
   }
 }
 

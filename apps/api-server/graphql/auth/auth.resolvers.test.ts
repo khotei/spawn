@@ -166,51 +166,6 @@ describe("Auth Resolvers", () => {
   })
 
   describe("Account Management", () => {
-    test("should create and delete an account", async () => {
-      const { createUser } = await query.CreateUser({
-        input: {
-          email: faker.internet.email(),
-          name: faker.person.fullName(),
-        },
-      })
-
-      const accountData = {
-        provider: "google",
-        providerAccountId: faker.string.uuid(),
-        type: "oauth",
-        userId: createUser.id,
-      }
-
-      const { createAccount } = await query.CreateAccount({
-        input: accountData,
-      })
-
-      ok(createAccount.id, "Account ID should be defined")
-      equal(createAccount.provider, accountData.provider)
-      equal(
-        createAccount.providerAccountId,
-        accountData.providerAccountId
-      )
-      equal(createAccount.userId, createUser.id)
-      deepEqual(createAccount.user.id, createUser.id)
-
-      const { deleteAccount } = await query.DeleteAccount({
-        input: { id: createAccount.id },
-      })
-
-      equal(deleteAccount.id, createAccount.id)
-
-      const deletedAccount =
-        await dbClient.account.findUnique({
-          where: { id: createAccount.id },
-        })
-      equal(
-        deletedAccount,
-        null,
-        "Account should be deleted"
-      )
-    })
-
     test("should link and unlink an account", async () => {
       const { createUser } = await query.CreateUser({
         input: {

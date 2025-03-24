@@ -1,4 +1,4 @@
-import { query } from "@/lib/query"
+import { query } from "@/common/lib/query"
 
 const HomePage = async () => {
   const {

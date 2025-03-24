@@ -1,4 +1,6 @@
-import { dbClient } from "@spawn/data-manager"
+import { ok } from "node:assert"
+
+import { dbClient, Prisma } from "@spawn/data-manager"
 import { GraphQLError } from "graphql/error"
 
 import type { Resolver } from "@/graphql/lib/resolver-type"
@@ -7,109 +9,89 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth"
+import {
+  createAccount,
+  createSession,
+  createVerificationToken,
+  deleteAccount,
+  deleteSession,
+  deleteVerificationToken,
+  findAccount,
+  findUniqueAccount,
+  findUniqueSession,
+  findUniqueVerificationToken,
+  getSession,
+  updateSession,
+} from "@/store/auth.store"
+import {
+  createUser,
+  deleteUser,
+  findUniqueUser,
+  getUser,
+  updateUser,
+} from "@/store/users.store"
 
 export const authResolvers: Resolver = {
   Mutation: {
-    createAccount: (__, { input }) => {
-      return dbClient.account.create({
-        data: input,
-        include: { user: true },
-      })
-    },
-
     createSession: (__, { input }) => {
-      return dbClient.session.create({
-        data: input,
-        include: { user: true },
-      })
+      return createSession(input)
     },
 
     createUser: (__, { input }) => {
-      return dbClient.user.create({ data: input })
+      return createUser(input)
     },
 
     createVerificationToken: (__, { input }) => {
-      return dbClient.verificationToken.create({
-        data: input,
-      })
-    },
-
-    deleteAccount: async (__, { input }) => {
-      const account =
-        await dbClient.account.findFirstOrThrow({
-          include: { user: true },
-          where: input,
-        })
-      await dbClient.account.delete({ where: input })
-
-      return account
+      return createVerificationToken(input)
     },
 
     deleteSession: async (__, { input }) => {
-      const session =
-        await dbClient.session.findFirstOrThrow({
-          include: { user: true },
-          where: input,
-        })
-      await dbClient.session.delete({
-        where: input,
-      })
+      const session = await getSession(input)
+
+      await deleteSession(input)
 
       return session
     },
 
     deleteUser: async (__, { input }) => {
-      const user = await dbClient.user.findFirstOrThrow({
-        where: input,
-      })
-      await dbClient.user.delete({ where: input })
+      const user = await getUser(input)
+
+      await deleteUser(input)
 
       return user
     },
 
     linkAccount: async (__, { input }) => {
-      const { provider, providerAccountId, type, userId } =
-        input
+      const findOrCreate = async <
+        Find extends typeof findAccount,
+        Create extends typeof createAccount,
+      >(
+        find: Find,
+        create: Create
+      ) => (await find(input)) ?? (await create(input))
 
-      const existingAccount =
-        await dbClient.account.findFirst({
-          include: { user: true },
-          where: { provider, providerAccountId },
-        })
-
-      if (existingAccount) {
-        return existingAccount
-      }
-
-      return dbClient.account.create({
-        data: {
-          provider,
-          providerAccountId,
-          type,
-          userId,
-        },
-        include: { user: true },
-      })
+      return findOrCreate(findAccount, createAccount)
     },
 
     signIn: async (__, { input }) => {
       const { email, password } = input
 
-      const user = await dbClient.user.findUnique({
-        where: { email },
-      })
+      const user = await findUniqueUser({ email })
 
-      if (!user || !user.password) {
-        throw new GraphQLError("Invalid email or password")
-      }
+      ok(
+        user?.password,
+        new GraphQLError("Invalid email or password")
+      )
 
       const validPassword = await verifyPassword(
         password,
         user.password
       )
-      if (!validPassword) {
-        throw new GraphQLError("Invalid email or password")
-      }
+
+      ok(
+        validPassword,
+        new GraphQLError("Invalid email or password")
+      )
 
       return user
     },
@@ -117,32 +99,27 @@ export const authResolvers: Resolver = {
     signUp: async (__, { input }) => {
       const { email, password } = input
 
-      const existingUser = await dbClient.user.findUnique({
-        where: { email },
-      })
+      const existingUser = await findUniqueUser({ email })
 
-      if (existingUser) {
-        throw new GraphQLError("Email already in use")
-      }
+      ok(
+        !existingUser,
+        new GraphQLError("Email already in use")
+      )
 
       const hashedPassword = await hashPassword(password)
-      const user = await dbClient.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-        },
+      const user = await createUser({
+        email,
+        password: hashedPassword,
       })
 
       const verificationToken = generateToken(24)
       const expires = new Date()
       expires.setHours(expires.getHours() + 24)
 
-      await dbClient.verificationToken.create({
-        data: {
-          expires,
-          identifier: email,
-          token: verificationToken,
-        },
+      await createVerificationToken({
+        expires,
+        identifier: email,
+        token: verificationToken,
       })
 
       // In a real app, send verification email here
@@ -152,115 +129,68 @@ export const authResolvers: Resolver = {
     },
 
     unlinkAccount: async (__, { input }) => {
-      const account = await dbClient.account.findFirst({
-        include: { user: true },
-        where: input,
-      })
+      const account = await findAccount(input)
 
-      if (!account) {
-        throw new GraphQLError("Account not found")
-      }
+      ok(account, new GraphQLError("Account not found"))
 
-      await dbClient.account.delete({
-        where: {
-          provider_providerAccountId: input,
-        },
-      })
+      await deleteAccount(input)
 
       return account
     },
 
     updateSession: (__, { input }) => {
-      const { expires, sessionToken, userId } = input
-
-      return dbClient.session.update({
-        data: {
-          expires: expires ?? undefined,
-          userId: userId ?? undefined,
-        },
-        include: { user: true },
-        where: { sessionToken },
-      })
+      return updateSession(input)
     },
 
     updateUser: async (__, { input }) => {
-      const { email, id, ...data } = input
+      const { id } = input
 
-      await dbClient.user.findFirstOrThrow({
-        where: { id },
-      })
+      await getUser({ id })
 
-      return dbClient.user.update({
-        data: {
-          ...data,
-          email: email ?? undefined,
-        },
-        where: { id },
-      })
+      return updateUser(input)
     },
 
     verifyToken: async (__, { input }) => {
       const verificationToken =
-        await dbClient.verificationToken.findUnique({
-          where: {
-            identifier_token: input,
-          },
-        })
+        await findUniqueVerificationToken(input)
 
-      if (!verificationToken) {
-        throw new GraphQLError(
-          "Verification token not found"
-        )
-      }
+      ok(
+        verificationToken,
+        new GraphQLError("Verification token not found")
+      )
 
-      if (
-        new Date(verificationToken.expires) < new Date()
-      ) {
-        throw new GraphQLError("Verification token expired")
-      }
+      ok(
+        new Date(verificationToken.expires) < new Date(),
+        new GraphQLError("Verification token expired")
+      )
 
-      await dbClient.verificationToken.delete({
-        where: { identifier_token: input },
-      })
+      // get user from token and verify
+      await deleteVerificationToken(input)
 
       return verificationToken
     },
   },
   Query: {
     account: async (__, { input }) => {
-      return dbClient.account.findUnique({
-        include: { user: true },
-        where: {
-          provider_providerAccountId: input,
-        },
-      })
+      return findUniqueAccount(input)
     },
 
     session: async (__, { input }) => {
-      return dbClient.session.findUnique({
-        include: { user: true },
-        where: input,
-      })
+      return findUniqueSession(input)
     },
 
     user: async (__, { input }) => {
-      return dbClient.user.findUnique({ where: input })
+      return findUniqueUser(input)
+    },
+
+    userByAccount: async (__, { input }) => {
+      const account = await findAccount(input)
+
+      return account?.user ?? null
     },
 
     userByEmail: async (__, { input }) => {
-      return dbClient.user.findUnique({ where: input })
-    },
-
-    userByProviderUserId: async (__, { input }) => {
-      const { providerUserId } = input
-
-      const account =
-        await dbClient.account.findFirstOrThrow({
-          include: { user: true },
-          where: { providerAccountId: providerUserId },
-        })
-
-      return account.user
+      return findUniqueUser(input)
     },
   },
 }

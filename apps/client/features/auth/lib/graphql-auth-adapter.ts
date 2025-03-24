@@ -1,13 +1,11 @@
 import { omit } from "lodash"
-import NextAuth, { type NextAuthResult } from "next-auth"
 import { Adapter } from "next-auth/adapters"
-import Credentials from "next-auth/providers/credentials"
 
-import { query } from "@/lib/query"
-import { signInFormSchema } from "@/validation/auth-validation"
+import { query } from "@/common/lib/query"
 
-export const GraphQLAdapter: Adapter = {
+export const GraphGQLAuthAdapter: Adapter = {
   async createSession(session) {
+    console.log("createSession called with:", session)
     const { createSession } = await query.CreateSession({
       input: session,
     })
@@ -15,15 +13,20 @@ export const GraphQLAdapter: Adapter = {
     return createSession
   },
 
-  async createUser(user) {
+  async createUser(newUser) {
+    console.log("createUser called with:", newUser)
     const { createUser } = await query.CreateUser({
-      input: user,
+      input: omit(newUser, "id"),
     })
 
     return createUser
   },
 
   async createVerificationToken(token) {
+    console.log(
+      "createVerificationToken called with:",
+      token
+    )
     const { createVerificationToken } =
       await query.CreateVerificationToken({
         input: token,
@@ -33,12 +36,17 @@ export const GraphQLAdapter: Adapter = {
   },
 
   async deleteSession(sessionToken) {
+    console.log("deleteSession called with:", sessionToken)
     await query.DeleteSession({
       input: { sessionToken },
     })
   },
 
   async getSessionAndUser(sessionToken) {
+    console.log(
+      "getSessionAndUser called with:",
+      sessionToken
+    )
     const { session } = await query.Session({
       input: { sessionToken },
     })
@@ -52,6 +60,7 @@ export const GraphQLAdapter: Adapter = {
   },
 
   async getUser(id) {
+    console.log("getUser called with:", id)
     const { user } = await query.User({
       input: { id },
     })
@@ -59,19 +68,24 @@ export const GraphQLAdapter: Adapter = {
     return user
   },
 
-  async getUserByAccount({ providerAccountId }) {
-    // @todo: is "providerAccountId" is unique for each user
-    const { userByProviderUserId } =
-      await query.UserByProviderUserId({
-        input: {
-          providerUserId: providerAccountId,
-        },
-      })
+  async getUserByAccount({ provider, providerAccountId }) {
+    console.log("getUserByAccount called with:", {
+      provider,
+      providerAccountId,
+    })
+    // @todo: add provider
+    const { userByAccount } = await query.UserByAccountId({
+      input: {
+        provider,
+        providerAccountId,
+      },
+    })
 
-    return userByProviderUserId
+    return userByAccount
   },
 
   async getUserByEmail(email) {
+    console.log("getUserByEmail called with:", email)
     const { userByEmail } = await query.UserByEmail({
       input: { email },
     })
@@ -79,20 +93,51 @@ export const GraphQLAdapter: Adapter = {
     return userByEmail
   },
 
-  async linkAccount(account) {
+  async linkAccount({
+    access_token,
+    expires_at,
+    id_token,
+    refresh_token,
+    token_type,
+    ...account
+  }) {
+    console.log("linkAccount called with:", {
+      access_token,
+      expires_at,
+      id_token,
+      refresh_token,
+      token_type,
+      ...account,
+    })
     await query.LinkAccount({
-      input: account,
+      input: {
+        ...account,
+        accessToken: access_token,
+        expiresAt: expires_at
+          ? new Date(expires_at)
+          : undefined,
+        idToken: id_token,
+        refreshToken: refresh_token,
+        tokenType: token_type,
+      },
     })
   },
 
   async unlinkAccount({ provider, providerAccountId }) {
-    // @todo: is "providerAccountId",  is unique for each user. do we need "type"?
+    console.log("unlinkAccount called with:", {
+      provider,
+      providerAccountId,
+    })
     await query.UnlinkAccount({
       input: { provider, providerAccountId },
     })
   },
 
   async updateSession({ sessionToken, ...data }) {
+    console.log("updateSession called with:", {
+      sessionToken,
+      ...data,
+    })
     const { updateSession } = await query.UpdateSession({
       input: {
         sessionToken,
@@ -104,6 +149,7 @@ export const GraphQLAdapter: Adapter = {
   },
 
   async updateUser(user) {
+    console.log("updateUser called with:", user)
     const { updateUser } = await query.UpdateUser({
       input: user,
     })
@@ -112,6 +158,10 @@ export const GraphQLAdapter: Adapter = {
   },
 
   async useVerificationToken({ identifier, token }) {
+    console.log("useVerificationToken called with:", {
+      identifier,
+      token,
+    })
     const { verifyToken } = await query.VerifyToken({
       input: { identifier, token },
     })
@@ -119,32 +169,3 @@ export const GraphQLAdapter: Adapter = {
     return verifyToken
   },
 }
-
-export const {
-  auth,
-  handlers,
-  signIn,
-  signOut,
-}: NextAuthResult = NextAuth({
-  adapter: GraphQLAdapter,
-  providers: [
-    Credentials({
-      authorize: async (credentials) => {
-        const { signIn: _signIn } = await query.SignIn({
-          input: signInFormSchema.parse(credentials),
-        })
-
-        return _signIn
-      },
-
-      credentials: {
-        email: {},
-        password: {},
-      },
-    }),
-  ],
-  session: {
-    maxAge: 30 * 24 * 60 * 60,
-    strategy: "jwt" as const,
-  },
-})

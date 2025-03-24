@@ -2,7 +2,7 @@ extend type Query {
   user(input: UserInput!): User
   userByEmail(input: UserByEmailInput!): User
   session(input: SessionInput!): Session
-  userByProviderUserId(input: UserByProviderUserIdInput!): User
+  userByAccount(input: UserByAccountInput!): User
   account(input: AccountInput!): Account
 }
 
@@ -14,8 +14,6 @@ extend type Mutation {
   updateUser(input: UpdateUserInput!): User!
   deleteUser(input: DeleteUserInput!): User!
 
-  createAccount(input: CreateAccountInput!): Account!
-  deleteAccount(input: DeleteAccountInput!): Account!
   linkAccount(input: LinkAccountInput!): Account!
   unlinkAccount(input: UnlinkAccountInput!): Account!
 
@@ -39,8 +37,9 @@ input SessionInput {
   sessionToken: String!
 }
 
-input UserByProviderUserIdInput {
-  providerUserId: String!
+input UserByAccountInput {
+  providerAccountId: String!
+  provider: String!
 }
 
 input AccountInput {
@@ -77,30 +76,25 @@ input DeleteUserInput {
   id: String!
 }
 
-input CreateAccountInput {
-  userId: String!
-  type: String!
-  provider: String!
-  providerAccountId: String!
-  refreshToken: String
-  accessToken: String
-  expiresAt: DateTimeISO
-  tokenType: String
-  scope: String
-  idToken: String
-  sessionState: String
-}
-
 input DeleteAccountInput {
   id: String!
 }
 
 input LinkAccountInput {
   userId: String!
-  provider: String!
-  providerAccountId: String!
   # @todo: add enum
   type: String!
+  # @todo: add enum
+  provider: String!
+  providerAccountId: String!
+  refreshToken: String
+  accessToken: String
+  expiresAt: DateTimeISO
+  tokenType: String
+  # @todo: add enum
+  scope: String
+  idToken: String
+  sessionState: String
 }
 
 input UnlinkAccountInput {
