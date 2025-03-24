@@ -10,13 +10,6 @@ import {
 
 export const authResolvers: Resolver = {
   Mutation: {
-    createAccount: (__, { input }) => {
-      return dbClient.account.create({
-        data: input,
-        include: { user: true },
-      })
-    },
-
     createSession: (__, { input }) => {
       return dbClient.session.create({
         data: input,
@@ -254,13 +247,12 @@ export const authResolvers: Resolver = {
     userByProviderUserId: async (__, { input }) => {
       const { providerUserId } = input
 
-      const account =
-        await dbClient.account.findFirstOrThrow({
-          include: { user: true },
-          where: { providerAccountId: providerUserId },
-        })
+      const account = await dbClient.account.findFirst({
+        include: { user: true },
+        where: { providerAccountId: providerUserId },
+      })
 
-      return account.user
+      return account?.user ?? null
     },
   },
 }

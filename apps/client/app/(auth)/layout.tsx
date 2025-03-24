@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import type { ReactNode } from "react"
 
-import { auth } from "@/lib/auth-config"
+import { auth } from "@/features/auth/lib/auth-config"
 
 const AuthLayout = async ({
   children,

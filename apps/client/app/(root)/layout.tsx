@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 
 import { LogoutButton } from "@/app/(root)/logout-button"
-import { auth } from "@/lib/auth-config"
+import { auth } from "@/features/auth/lib/auth-config"
 
 const RootLayout = async ({
   children,

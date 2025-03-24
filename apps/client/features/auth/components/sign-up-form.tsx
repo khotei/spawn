@@ -1,7 +1,7 @@
 "use client"
 import { useActionState } from "react"
 
-import { register } from "@/actions/auth.actions"
+import { register } from "@/features/auth/actions/auth.actions"
 
 export const SignUpForm = () => {
   const [data, action] = useActionState(register, null)

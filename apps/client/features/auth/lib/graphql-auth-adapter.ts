@@ -1,12 +1,9 @@
-import { omit } from "lodash"
-import NextAuth, { type NextAuthResult } from "next-auth"
+import { camelCase, mapKeys, omit } from "lodash"
 import { Adapter } from "next-auth/adapters"
-import Credentials from "next-auth/providers/credentials"
 
-import { query } from "@/lib/query"
-import { signInFormSchema } from "@/validation/auth-validation"
+import { query } from "@/common/lib/query"
 
-export const GraphQLAdapter: Adapter = {
+export const GraphGQLAuthAdapter: Adapter = {
   async createSession(session) {
     const { createSession } = await query.CreateSession({
       input: session,
@@ -15,9 +12,9 @@ export const GraphQLAdapter: Adapter = {
     return createSession
   },
 
-  async createUser(user) {
+  async createUser(newUser) {
     const { createUser } = await query.CreateUser({
-      input: user,
+      input: omit(newUser, "id"),
     })
 
     return createUser
@@ -59,8 +56,8 @@ export const GraphQLAdapter: Adapter = {
     return user
   },
 
-  async getUserByAccount({ providerAccountId }) {
-    // @todo: is "providerAccountId" is unique for each user
+  async getUserByAccount({ provider, providerAccountId }) {
+    // @todo: add provider
     const { userByProviderUserId } =
       await query.UserByProviderUserId({
         input: {
@@ -79,14 +76,24 @@ export const GraphQLAdapter: Adapter = {
     return userByEmail
   },
 
-  async linkAccount(account) {
+  async linkAccount({ expires_at, ...account }) {
+    console.log(
+      mapKeys(account, (__, key) => camelCase(key))
+    )
     await query.LinkAccount({
-      input: account,
+      input: mapKeys(
+        {
+          ...account,
+          expires_at: expires_at
+            ? new Date(expires_at)
+            : undefined,
+        },
+        (__, key) => camelCase(key)
+      ),
     })
   },
 
   async unlinkAccount({ provider, providerAccountId }) {
-    // @todo: is "providerAccountId",  is unique for each user. do we need "type"?
     await query.UnlinkAccount({
       input: { provider, providerAccountId },
     })
@@ -119,32 +126,3 @@ export const GraphQLAdapter: Adapter = {
     return verifyToken
   },
 }
-
-export const {
-  auth,
-  handlers,
-  signIn,
-  signOut,
-}: NextAuthResult = NextAuth({
-  adapter: GraphQLAdapter,
-  providers: [
-    Credentials({
-      authorize: async (credentials) => {
-        const { signIn: _signIn } = await query.SignIn({
-          input: signInFormSchema.parse(credentials),
-        })
-
-        return _signIn
-      },
-
-      credentials: {
-        email: {},
-        password: {},
-      },
-    }),
-  ],
-  session: {
-    maxAge: 30 * 24 * 60 * 60,
-    strategy: "jwt" as const,
-  },
-})

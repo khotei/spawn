@@ -5,6 +5,7 @@ dist
 out
 build
 next-env.d.ts
+.env
 
 .turbo
 *.tsbuildinfo
